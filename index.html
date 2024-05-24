@@ -20,6 +20,11 @@
     <input type="text" id="seekTime" placeholder="Time in seconds">
     <button onclick="seekToTime()">Seek to Time</button>
   </div>
+  <br>
+  <div>
+    <input type="text" id="videoId" placeholder="Enter YouTube Video ID">
+    <button onclick="loadNewVideo()">Load Video</button>
+  </div>
   
   <!-- Load YouTube IFrame API -->
   <script>
@@ -36,7 +41,7 @@
       player = new YT.Player('player', {
         height: '390',
         width: '640',
-        videoId: 'M7lc1UVf-VE', // Replace with your YouTube video ID
+        videoId: 'M7lc1UVf-VE', // Initial YouTube video ID
         events: {
           'onReady': onPlayerReady,
         }
@@ -68,6 +73,13 @@
     function seekToTime() {
       let seekTime = document.getElementById('seekTime').value;
       player.seekTo(parseFloat(seekTime), true);
+    }
+
+    function loadNewVideo() {
+      let videoId = document.getElementById('videoId').value;
+      if (videoId) {
+        player.loadVideoById(videoId);
+      }
     }
   </script>
 </body>
