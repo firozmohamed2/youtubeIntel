@@ -4,12 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YouTube Video Player with External Controls</title>
+  <style>
+    #player-container {
+      position: relative;
+      width: 640px;
+      height: 390px;
+    }
+    #player-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <h1>YouTube Video Player</h1>
   
   <!-- YouTube Video Embed -->
-  <div id="player"></div>
+  <div id="player-container">
+    <div id="player"></div>
+    <div id="player-overlay"></div>
+  </div>
   
   <!-- External Controls -->
   <div>
@@ -49,6 +68,13 @@
         height: '390',
         width: '640',
         videoId: 'M7lc1UVf-VE', // Initial YouTube video ID
+        playerVars: {
+          'controls': 0,        // Hide controls
+          'modestbranding': 1,  // Minimize YouTube logo
+          'rel': 0,             // Disable related videos at the end
+          'showinfo': 0,        // Hide video info (deprecated, but including for safety)
+          'iv_load_policy': 3   // Disable annotations
+        },
         events: {
           'onReady': onPlayerReady,
         }
@@ -57,6 +83,14 @@
 
     function onPlayerReady(event) {
       console.log('Player is ready');
+      // Add a click event listener to the overlay to toggle play/pause
+      document.getElementById('player-overlay').addEventListener('click', () => {
+        if (player.getPlayerState() === YT.PlayerState.PLAYING) {
+          player.pauseVideo();
+        } else {
+          player.playVideo();
+        }
+      });
     }
 
     function playVideo() {
@@ -91,8 +125,6 @@
 
     function seekTo200() {
       player.seekTo(200, true);
-      player.playVideo();
-
     }
   </script>
 </body>
