@@ -25,6 +25,13 @@
     <input type="text" id="videoId" placeholder="Enter YouTube Video ID">
     <button onclick="loadNewVideo()">Load Video</button>
   </div>
+  <br>
+  <div>
+    <button onclick="seekTo200()">Option A</button>
+    <button onclick="seekTo200()">Option B</button>
+    <button onclick="seekTo200()">Option C</button>
+    <button onclick="seekTo200()">Option D</button>
+  </div>
   
   <!-- Load YouTube IFrame API -->
   <script>
@@ -80,6 +87,12 @@
       if (videoId) {
         player.loadVideoById(videoId);
       }
+    }
+
+    function seekTo200() {
+      player.seekTo(200, true);
+      player.playVideo();
+
     }
   </script>
 </body>
