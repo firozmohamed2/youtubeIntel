@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Video Player with External Controls</title>
+</head>
+<body>
+  <h1>YouTube Video Player</h1>
+  
+  <!-- YouTube Video Embed -->
+  <div id="player"></div>
+  
+  <!-- External Controls -->
+  <div>
+    <button onclick="playVideo()">Play</button>
+    <button onclick="pauseVideo()">Pause</button>
+    <button onclick="seekForward()">Forward 10s</button>
+    <button onclick="seekBackward()">Backward 10s</button>
+    <input type="text" id="seekTime" placeholder="Time in seconds">
+    <button onclick="seekToTime()">Seek to Time</button>
+  </div>
+  
+  <!-- Load YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    let player;
+
+    // YouTube IFrame API ready function
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '390',
+        width: '640',
+        videoId: 'M7lc1UVf-VE', // Replace with your YouTube video ID
+        events: {
+          'onReady': onPlayerReady,
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      console.log('Player is ready');
+    }
+
+    function playVideo() {
+      player.playVideo();
+    }
+
+    function pauseVideo() {
+      player.pauseVideo();
+    }
+
+    function seekForward() {
+      let currentTime = player.getCurrentTime();
+      player.seekTo(currentTime + 10, true);
+    }
+
+    function seekBackward() {
+      let currentTime = player.getCurrentTime();
+      player.seekTo(currentTime - 10, true);
+    }
+
+    function seekToTime() {
+      let seekTime = document.getElementById('seekTime').value;
+      player.seekTo(parseFloat(seekTime), true);
+    }
+  </script>
+</body>
+</html>
