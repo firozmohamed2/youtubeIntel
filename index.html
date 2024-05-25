@@ -61,6 +61,7 @@
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
     let player;
+    let checkTimeInterval;
 
     // This function will be called by the API when it is ready
     function onYouTubeIframeAPIReady() {
@@ -77,6 +78,7 @@
         },
         events: {
           'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
         }
       });
     }
@@ -91,6 +93,21 @@
           player.playVideo();
         }
       });
+    }
+
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        checkTimeInterval = setInterval(checkPlayerTime, 1000); // Check every second
+      } else {
+        clearInterval(checkTimeInterval);
+      }
+    }
+
+    function checkPlayerTime() {
+      let currentTime = player.getCurrentTime();
+      if (currentTime > 30) {
+        player.pauseVideo();
+      }
     }
 
     function playVideo() {
