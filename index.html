@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Video Player with External Controls</title>
+  <title>YouTube Video Player with Firestore Data</title>
   <style>
     #player-container {
       position: relative;
@@ -19,7 +19,28 @@
       background: transparent;
       cursor: pointer;
     }
+    .options {
+      display: none; /* Hide option buttons initially */
+    }
   </style>
+  <!-- Firebase Configuration -->
+  <script src="https://www.gstatic.com/firebasejs/9.9.3/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore-compat.js"></script>
+  <script>
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA88fPkOvcI4QA9qD3ROpk-ay-V6ibQQlc",
+      authDomain: "my-application-7fd40.firebaseapp.com",
+      projectId: "my-application-7fd40",
+      storageBucket: "my-application-7fd40.appspot.com",
+      messagingSenderId: "269589994279",
+      appId: "1:269589994279:web:4c617a622c328a1224e702",
+      measurementId: "G-D8MD1J28GR"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
 </head>
 <body>
   <h1>YouTube Video Player</h1>
@@ -36,20 +57,14 @@
     <button onclick="pauseVideo()">Pause</button>
     <button onclick="seekForward()">Forward 10s</button>
     <button onclick="seekBackward()">Backward 10s</button>
-    <input type="text" id="seekTime" placeholder="Time in seconds">
-    <button onclick="seekToTime()">Seek to Time</button>
+    <button onclick="endVideo()">End</button>
   </div>
   <br>
-  <div>
-    <input type="text" id="videoId" placeholder="Enter YouTube Video ID">
-    <button onclick="loadNewVideo()">Load Video</button>
-  </div>
-  <br>
-  <div>
-    <button onclick="seekTo200()">Option A</button>
-    <button onclick="seekTo200()">Option B</button>
-    <button onclick="seekTo200()">Option C</button>
-    <button onclick="seekTo200()">Option D</button>
+  <div id="options" class="options">
+    <button onclick="seekToConfiguredTime()">Option A</button>
+    <button onclick="seekToConfiguredTime()">Option B</button>
+    <button onclick="seekToConfiguredTime()">Option C</button>
+    <button onclick="seekToConfiguredTime()">Option D</button>
   </div>
   
   <!-- Load YouTube IFrame API -->
@@ -62,25 +77,52 @@
 
     let player;
     let checkTimeInterval;
+    let videoConfig = {};
 
-    // This function will be called by the API when it is ready
     function onYouTubeIframeAPIReady() {
-      player = new YT.Player('player', {
-        height: '390',
-        width: '640',
-        videoId: 'M7lc1UVf-VE', // Initial YouTube video ID
-        playerVars: {
-          'controls': 0,        // Hide controls
-          'modestbranding': 1,  // Minimize YouTube logo
-          'rel': 0,             // Disable related videos at the end
-          'showinfo': 0,        // Hide video info (deprecated, but including for safety)
-          'iv_load_policy': 3   // Disable annotations
-        },
-        events: {
-          'onReady': onPlayerReady,
-          'onStateChange': onPlayerStateChange
-        }
-      });
+      loadVideoConfig("doc1");
+    }
+
+    // Load video configuration from Firestore
+    function loadVideoConfig(documentId) {
+      db.collection("data").doc(documentId)
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            videoConfig = doc.data();
+            console.log(`Loaded Document ID: ${documentId}`);
+            console.log(`Start Time: ${videoConfig.startTime}`);
+            console.log(`Pause Time: ${videoConfig.pauseTime}`);
+            console.log(`Show Options Time: ${videoConfig.showOptionsTime}`);
+            console.log(`Next Document ID: ${videoConfig.nextDocumentId}`);
+
+            if (!player) {
+              player = new YT.Player('player', {
+                height: '390',
+                width: '640',
+                videoId: videoConfig.videoId, // Set video ID from Firestore
+                playerVars: {
+                  'controls': 0,        // Hide controls
+                  'modestbranding': 1,  // Minimize YouTube logo
+                  'rel': 0,             // Disable related videos at the end
+                  'showinfo': 0,        // Hide video info (deprecated, but including for safety)
+                  'iv_load_policy': 3   // Disable annotations
+                },
+                events: {
+                  'onReady': onPlayerReady,
+                  'onStateChange': onPlayerStateChange
+                }
+              });
+            } else {
+              player.loadVideoById(videoConfig.videoId, videoConfig.startTime || 0);
+            }
+          } else {
+            console.log("No such document!");
+          }
+        })
+        .catch((error) => {
+          console.log("Error getting document:", error);
+        });
     }
 
     function onPlayerReady(event) {
@@ -93,6 +135,8 @@
           player.playVideo();
         }
       });
+      // Start video at configured start time
+      player.seekTo(videoConfig.startTime || 0, true);
     }
 
     function onPlayerStateChange(event) {
@@ -105,8 +149,11 @@
 
     function checkPlayerTime() {
       let currentTime = player.getCurrentTime();
-      if (currentTime > 30) {
-        player.pauseVideo();
+      if (currentTime > (videoConfig.showOptionsTime || 15)) {
+        document.getElementById('options').style.display = 'block'; // Show option buttons
+      }
+      if (currentTime > (videoConfig.pauseTime || 30)) {
+        player.pauseVideo(); // Pause video at configured pause time
       }
     }
 
@@ -128,20 +175,22 @@
       player.seekTo(currentTime - 10, true);
     }
 
-    function seekToTime() {
-      let seekTime = document.getElementById('seekTime').value;
-      player.seekTo(parseFloat(seekTime), true);
-    }
-
-    function loadNewVideo() {
-      let videoId = document.getElementById('videoId').value;
-      if (videoId) {
-        player.loadVideoById(videoId);
+    function seekToConfiguredTime() {
+      player.seekTo(videoConfig.seekToTime || 200, true);
+      hideOptions();
+      if (videoConfig.nextDocumentId) {
+        loadVideoConfig(videoConfig.nextDocumentId); // Load the next document's configuration
       }
     }
 
-    function seekTo200() {
-      player.seekTo(200, true);
+    function endVideo() {
+      if (player) {
+        player.stopVideo();
+      }
+    }
+
+    function hideOptions() {
+      document.getElementById('options').style.display = 'none'; // Hide option buttons
     }
   </script>
 </body>
