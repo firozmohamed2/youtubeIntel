@@ -84,6 +84,45 @@
         let startTime;
         let showNextTime = 1000000000;
 
+
+
+
+
+
+let runTimer; // Variable to store the stopwatch time
+let timerInterval; // Variable to store the interval ID
+
+function startRunTimer() {
+    let startTime = Date.now(); // Record the start time
+
+    // Clear any existing intervals to ensure only one timer runs at a time
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+
+    timerInterval = setInterval(function() {
+        let elapsedTime = Date.now() - startTime; // Calculate elapsed time
+        runTimer = (elapsedTime / 1000).toFixed(2); // Convert to seconds and format to 2 decimal places
+        //console.log(runTimer);
+         // Output the time to the console (for demonstration purposes)
+    }, 100); // Update the time every 100 milliseconds (0.1 seconds)
+}
+
+function stopRunTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval); // Clear the interval to stop the timer
+    }
+}
+
+// Example usage
+
+// To stop the timer, you can call:
+// stopRunTimer();
+
+
+
+
+
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 height: '390',
@@ -142,6 +181,7 @@
 
                         playVideoFromStart(videoId, startTime);
                         setTimeout(checkElapsedTime, 1000); // Add this line to set up the elapsed time check
+                        startRunTimer();
                     } else {
                         console.log("No such document!");
                         endVideo();
@@ -158,10 +198,18 @@
 
             if (videoConfig.showNextTime && currentTime > videoConfig.showNextTime) {
                 loadVideoConfig(videoConfig.nextDocumentId);
+                showOptionsTime= 100000000;
             }
 
             if (currentTime > showOptionsTime) {
+                if(runTimer>5){
+                    console.log("runtimer " + runTimer);
                 document.getElementById('options').style.display = 'block';
+                }
+                else {
+                    document.getElementById('options').style.display = 'none';
+
+                }
             }
             if (currentTime > pauseTime) {
                 player.pauseVideo();
@@ -207,11 +255,15 @@
 
         function checkAnswer(selectedOption) {
             hideOptions();
+            runTimer=0;
+            showOptionsTime= 100000000;
 
             if (selectedOption === videoConfig.correctOption) {
                 loadVideoConfig(videoConfig.nextDocumentIdForRightSelection);
+                hideOptions();
             } else {
                 loadVideoConfig(videoConfig.nextDocumentIdForWrongSelection);
+                hideOptions();
             }
         }
 
@@ -223,17 +275,19 @@
 
         function hideOptions() {
             document.getElementById('options').style.display = 'none';
+            console.log("hidden options");
+            runTimer= 0;
         }
 
         function checkElapsedTime() {
             let currentTime = player.getCurrentTime();
-            if (Math.abs(currentTime - startTime) > 5) {
+            if (Math.abs(currentTime - startTime) > 2) {
                 
-                console.log("More than 5 seconds"+ startTime + " " + currentTime);
+                console.log("More than 2 seconds"+ startTime + " " + currentTime);
                 player.seekTo(startTime, true);
 
             } else {
-                console.log("Less than 5 seconds"+ startTime + " " + currentTime);
+                console.log("Less than 2 seconds"+ startTime + " " + currentTime);
             }
         }
     </script>
