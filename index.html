@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>YouTube Video Player with Firestore Data</title>
-        <style>
-          #player-container {
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Player with Firestore Data</title>
+    <style>
+        #player-container {
             position: relative;
             width: 640px;
             height: 390px;
-          }
-          #player-overlay {
+        }
+        #player-overlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -18,17 +18,20 @@
             height: 100%;
             background: transparent;
             cursor: pointer;
-          }
-          .options {
+        }
+        .options {
             display: none; /* Hide option buttons initially */
-          }
-        </style>
-        <!-- Firebase Configuration -->
-        <script src="https://www.gstatic.com/firebasejs/9.9.3/firebase-app-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore-compat.js"></script>
-        <script>
-          // Your Firebase configuration
-          const firebaseConfig = {
+        }
+        .control-buttons {
+            display: none;
+        }
+    </style>
+    <!-- Firebase Configuration -->
+    <script src="https://www.gstatic.com/firebasejs/9.9.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore-compat.js"></script>
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
             apiKey: "AIzaSyA88fPkOvcI4QA9qD3ROpk-ay-V6ibQQlc",
             authDomain: "my-application-7fd40.firebaseapp.com",
             projectId: "my-application-7fd40",
@@ -36,67 +39,59 @@
             messagingSenderId: "269589994279",
             appId: "1:269589994279:web:4c617a622c328a1224e702",
             measurementId: "G-D8MD1J28GR"
-          };
-          // Initialize Firebase
-          firebase.initializeApp(firebaseConfig);
-          const db = firebase.firestore();
-        </script>
-      </head>
-      
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+</head>
+
 <body>
     <h1>YouTube Video Player</h1>
-  
+
     <!-- YouTube Video Embed -->
     <div id="player-container">
-      <div id="player"></div>
-      <div id="player-overlay"></div>
+        <div id="player"></div>
+        <div id="player-overlay"></div>
     </div>
-    
+
     <!-- External Controls -->
-    <div>
-      <button onclick="playVideo()">Play</button>
-      <button onclick="pauseVideo()">Pause</button>
-      <button onclick="seekForward()">Forward 10s</button>
-      <button onclick="seekBackward()">Backward 10s</button>
+    <div class="control-buttons">
+        <button id="play-button" onclick="playVideo()">Play</button>
+        <button id="pause-button" onclick="pauseVideo()">Pause</button>
+        <button onclick="seekForward()">Forward 10s</button>
+        <button onclick="seekBackward()">Backward 10s</button>
     </div>
-  
+
     <br>
     <div id="options" class="options">
-      <button onclick="checkAnswer('a')">Option A</button>
-      <button onclick="checkAnswer('b')">Option B</button>
-      <button onclick="checkAnswer('c')">Option C</button>
-      <button onclick="checkAnswer('d')">Option D</button>
+        <button onclick="checkAnswer('a')">Option A</button>
+        <button onclick="checkAnswer('b')">Option B</button>
+        <button onclick="checkAnswer('c')">Option C</button>
+        <button onclick="checkAnswer('d')">Option D</button>
     </div>
-  
-    <div id="current-time">Current Time: 0s</div>
-  
-    <!-- Load YouTube IFrame API -->
 
+    <div id="current-time">Current Time: 0s</div>
+
+    <!-- Load YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        // Load the IFrame Player API code asynchronously.
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        // Create a YouTube player variable.
         var player;
         let checkTimeInterval;
         let videoConfig = {};
         let pauseTime = 10000;
-        let showOptionsTime = 10000;
-        let startTime = 10;
+        let showOptionsTime = 100000000;
+        let startTime;
+        let showNextTime = 1000000000;
 
-        // This function creates an <iframe> (and YouTube player) after the API code downloads.
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 height: '390',
                 width: '640',
                 videoId: '',
                 events: {
-                  'onReady': onPlayerReady,
-                  'onStateChange': onPlayerStateChange
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
                 }
             });
 
@@ -105,7 +100,6 @@
 
         function onPlayerReady(event) {
             console.log('Player is ready');
-            // Add a click event listener to the overlay to toggle play/pause
             document.getElementById('player-overlay').addEventListener('click', () => {
                 if (player.getPlayerState() === YT.PlayerState.PLAYING) {
                     player.pauseVideo();
@@ -113,40 +107,44 @@
                     player.playVideo();
                 }
             });
+            document.querySelector('.control-buttons').style.display = 'block';
         }
 
         function onPlayerStateChange(event) {
             console.log("State changed");
             if (event.data === YT.PlayerState.PLAYING) {
-                checkTimeInterval = setInterval(checkPlayerTime, 1000); // Check every second
-            } else {
+                document.getElementById('play-button').style.display = 'none';
+                document.getElementById('pause-button').style.display = 'block';
+                checkTimeInterval = setInterval(checkPlayerTime, 1000);
+            } else if (event.data === YT.PlayerState.PAUSED) {
+                document.getElementById('play-button').style.display = 'block';
+                document.getElementById('pause-button').style.display = 'none';
                 clearInterval(checkTimeInterval);
+            } else {
+                document.getElementById('play-button').style.display = 'none';
+                document.getElementById('pause-button').style.display = 'none';
             }
         }
 
         function loadVideoConfig(documentId) {
+            document.getElementById('options').style.display = 'none';
+
             db.collection("data").doc(documentId)
                 .get()
                 .then((doc) => {
                     if (doc.exists) {
                         videoConfig = doc.data();
                         console.log(`Loaded Document ID: ${documentId}`);
-                        console.log(`Start Time: ${videoConfig.startTime}`);
-                        console.log(`Pause Time: ${videoConfig.pauseTime}`);
-                        console.log(`Show Options Time: ${videoConfig.showOptionsTime}`);
-                        console.log(`Correct Option: ${videoConfig.correctOption}`);
-                        console.log(`Next Document ID for Right Selection: ${videoConfig.nextDocumentIdForRightSelection}`);
-                        console.log(`Next Document ID for Wrong Selection: ${videoConfig.nextDocumentIdForWrongSelection}`);
-            
                         pauseTime = videoConfig.pauseTime;
-                        startTime = videoConfig.startTime;
+                        startTime = videoConfig.startTime || 10;
                         showOptionsTime = videoConfig.showOptionsTime || 100000;
                         videoId = videoConfig.videoId;
 
-                        playVideoFromStart(videoId,startTime);
+                        playVideoFromStart(videoId, startTime);
+                        setTimeout(checkElapsedTime, 1000); // Add this line to set up the elapsed time check
                     } else {
                         console.log("No such document!");
-                        endVideo(); 
+                        endVideo();
                     }
                 })
                 .catch((error) => {
@@ -158,19 +156,35 @@
             let currentTime = player.getCurrentTime();
             document.getElementById('current-time').innerText = `Current Time: ${currentTime.toFixed(1)}s`;
 
+            if (videoConfig.showNextTime && currentTime > videoConfig.showNextTime) {
+                loadVideoConfig(videoConfig.nextDocumentId);
+            }
+
             if (currentTime > showOptionsTime) {
-                document.getElementById('options').style.display = 'block'; // Show option buttons
+                document.getElementById('options').style.display = 'block';
             }
             if (currentTime > pauseTime) {
-                player.pauseVideo(); // Pause video at configured pause time
+                player.pauseVideo();
             }
         }
 
-        function playVideoFromStart(vID,starttime) {
-            player.loadVideoById({
+        function playVideoFromStart(vID, starttime) {
+
+
+            try {
+                player.loadVideoById({
                 videoId: vID,
                 startSeconds: starttime
             });
+            } catch (error) {
+                if (error instanceof TypeError && error.message.includes("player.loadVideoById is not a function")) {
+            console.error("Error occurred: ", error);
+            window.location.reload();
+        } else {
+            throw error; // rethrow the error if it's not the expected TypeError
+        }
+            }
+           
         }
 
         function playVideo() {
@@ -208,9 +222,20 @@
         }
 
         function hideOptions() {
-            document.getElementById('options').style.display = 'none'; // Hide option buttons
+            document.getElementById('options').style.display = 'none';
         }
 
+        function checkElapsedTime() {
+            let currentTime = player.getCurrentTime();
+            if (Math.abs(currentTime - startTime) > 5) {
+                
+                console.log("More than 5 seconds"+ startTime + " " + currentTime);
+                player.seekTo(startTime, true);
+
+            } else {
+                console.log("Less than 5 seconds"+ startTime + " " + currentTime);
+            }
+        }
     </script>
 </body>
 </html>
