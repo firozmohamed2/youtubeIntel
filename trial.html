@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&display=swap" rel="stylesheet">
+    <title>Mobile First YouTube Video Player</title>
+    <!-- <link rel="stylesheet" href="styles.css"> -->
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #ededf8;
+}
+
+.heading {
+    font-family: 'League Spartan', sans-serif;
+    font-weight: 700;
+    margin: 20px 0;
+    color: #38425f;
+    align-items: left;
+}
+
+.video-container {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.video-container iframe {
+    width: 100%;
+    aspect-ratio: 16 / 9; /* This will maintain a 16:9 aspect ratio */
+}
+
+
+
+
+
+.controls, .options {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+    width: 100%;
+}
+
+.controls{
+    background: #ffffff;
+
+}
+
+.controls button, .options button {
+    margin: 0 5px;
+    font-size: 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+}
+
+.options button{
+    margin: 0 20px;
+    padding: 10px 15px;
+    border-radius: 10px;
+}
+
+.controls button:hover, .options button:hover {
+    background-color: #0056b3;
+}
+
+
+
+    </style>
+</head>
+<body>
+    <h1 class="heading">INTEL CLASS</h1>
+
+    <div class="video-container">
+        <iframe id="videoPlayer" src="https://www.youtube.com/embed/XrYzXwnq7Fc" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="controls">
+        <button id="backward"><img src="assets/img/backwardTen.png"></button>
+        <button id="pause"><img src="assets/img/pauseNew.png"></button>
+        <button id="forward"><img src="assets/img/forwardTen.png"></button>
+    </div>
+    <div class="options">
+        <button class="option">A</button>
+        <button class="option">B</button>
+        <button class="option">C</button>
+        <button class="option">D</button>
+    </div>
+
+    <!-- <script src="script.js"></script> -->
+</body>
+</html>
