@@ -2,78 +2,107 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&display=swap" rel="stylesheet">
     <title>Mobile First YouTube Video Player</title>
-    <!-- <link rel="stylesheet" href="styles.css"> -->
     <style>
         body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #ededf8;
-}
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #ededf8;
+        }
 
-.heading {
-    font-family: 'League Spartan', sans-serif;
-    font-weight: 700;
-    margin: 20px 0;
-    color: #38425f;
-    align-items: left;
-}
+        .heading {
+            font-family: 'League Spartan', sans-serif;
+            font-weight: 700;
+            margin: 20px 0;
+            color: #38425f;
+            align-items: left;
+        }
 
-.video-container {
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-}
+        .video-container {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            background: #fff;
+        }
 
-.video-container iframe {
-    width: 100%;
-    aspect-ratio: 16 / 9; /* This will maintain a 16:9 aspect ratio */
-}
+        .video-container iframe {
+            width: 100%;
+            aspect-ratio: 16 / 9; /* This will maintain a 16:9 aspect ratio */
+        }
+
+        .controls, .options {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+            width: 100%;
+        }
+
+        .controls {
+            background: #ffffff;
+        }
+
+        .controls button, .options button {
+            margin: 0 5px;
+            font-size: 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ffffff;
+            color: rgb(0, 0, 0);
+            cursor: pointer;
+            transition: transform 0.5s;
+        }
+
+        .options button {
+            margin: 0 20px;
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+
+        .controls button:hover, .options button:hover {
+            background-color: #e6e0e0;
+        }
+
+        .choices{
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+            width: 100%;
+
+            
+            
+        }
 
 
+        .choices button{
+            margin: 0 5px;
+            font-size: 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ffffff;
+            color: rgb(0, 0, 0);
+            cursor: pointer;
+            transition: transform 0.5s;
+            margin: 0 20px;
+            padding: 10px 25px;
 
-
-
-.controls, .options {
-    display: flex;
-    justify-content: center;
-    margin: 10px 0;
-    width: 100%;
-}
-
-.controls{
-    background: #ffffff;
-
-}
-
-.controls button, .options button {
-    margin: 0 5px;
-    font-size: 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #ffffff;
-    color: rgb(0, 0, 0);
-    cursor: pointer;
-}
-
-.options button{
-    margin: 0 20px;
-    padding: 10px 15px;
-    border-radius: 10px;
-}
-
-.controls button:hover, .options button:hover {
-    background-color: #0056b3;
-}
-
-
-
+        }
+        .pause{
+            width: 25px;
+           
+            
+        }
+        #clear_button{
+            color: #47C450;
+        }
+        #not_clear_button{
+            color: #7990DB;
+        }
     </style>
 </head>
 <body>
@@ -83,9 +112,9 @@
         <iframe id="videoPlayer" src="https://www.youtube.com/embed/XrYzXwnq7Fc" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
     <div class="controls">
-        <button id="backward"><img src="backwardTen.png"></button>
-        <button id="pause"><img src="pauseNew.png"></button>
-        <button id="forward"><img src="forwardTen.png"></button>
+        <button id="backward"><img src="assets/img/backward.png"></button>
+        <button id="pause"><img src="assets/img/pause1.png" style="width: 25px;"></button>
+        <button id="forward"><img src="assets/img/forward.png"></button>
     </div>
     <div class="options">
         <button class="option">A</button>
@@ -94,6 +123,27 @@
         <button class="option">D</button>
     </div>
 
-    <!-- <script src="script.js"></script> -->
+    <div class="choices">
+        <button class="option" id="clear_button">Clear</button>
+        <button class="option" id="not_clear_button">Not Clear</button>
+    </div>
+
+
+
+    <script>
+        document.getElementById('backward').addEventListener('click', function() {
+            this.style.transform = 'rotate(-30deg)';
+            setTimeout(() => {
+                this.style.transform = 'rotate(0deg)';
+            }, 100);
+        });
+
+        document.getElementById('forward').addEventListener('click', function() {
+            this.style.transform = 'rotate(30deg)';
+            setTimeout(() => {
+                this.style.transform = 'rotate(0deg)';
+            }, 100);
+        });
+    </script>
 </body>
 </html>
