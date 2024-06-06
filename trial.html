@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" type="text/css" />
@@ -114,6 +115,10 @@
         #not_clear_button{
             color: #7990DB;
         }
+
+        #timer{
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -124,9 +129,9 @@
       </div> -->
     </div>
     <div class="controls" id="controls">
-        <button id="backward"><img src="backward.png"></button>
-        <button id="pause"><img id="pause_img" src="play.png" style="width: 25px;"></button>
-        <button id="forward"><img src="forward.png"></button>
+        <button id="backward"><img src="assets/img/backward.png"></button>
+        <button id="pause"><img id="pause_img" src="assets/img/play.png" style="width: 25px;"></button>
+        <button id="forward"><img src="assets/img/forward.png"></button>
     </div>
     <div class="options">
         <button class="option" id="A">A</button>
@@ -135,10 +140,11 @@
         <button class="option" id="D">D</button>
     </div>
 
-    <div class="choices">
+    <div class="choices" id="choices">
         <button class="option" id="clear_button">Clear</button>
         <button class="option" id="not_clear_button">Not Clear</button>
     </div>
+ <h4 id="timer"></h4>
 
     <!-- Core theme JS-->
   <!-- <script src="scripts.js"></script> -->
@@ -266,6 +272,8 @@ var videoEndTime = "";
 var hasQuestion = "";
 var correctAnswerOption = "";
 var showQuestionTime = "100";
+var showChoicesTime = "100";
+
 var nextPartTime = "";
 var videoStartTime = "";
 var videoId = "";
@@ -280,6 +288,7 @@ var rightAnswerOption = "";
 var rightAnswerShowQuestionTime = "";
 var rightAnswerNextPartTime = "";
 var rightAnswerVideoId = "";
+var rightAnswershowChoicesTime ="";
 
 // Variables for wrong answer
 var wrongAnswerStartTime = "";
@@ -291,6 +300,7 @@ var wrongAnswerOption = "";
 var wrongAnswerShowQuestionTime = "";
 var wrongAnswerNextPartTime = "";
 var wrongAnswerVideoId = "";
+var wrongAnswershowChoicesTime = "";
 
 // Data from YouTube file
 var selectedAnswer = "";
@@ -304,14 +314,23 @@ var optionA = document.getElementById("A");
 var optionB = document.getElementById("B");
 var optionC = document.getElementById("C");
 var optionD = document.getElementById("D");
+var clearButton = document.getElementById("clear_button");
+var NotClearButton = document.getElementById("not_clear_button");
 
 
 optionA.style.display = "none";
 optionB.style.display = "none";
 optionC.style.display = "none";
 optionD.style.display = "none";
+ clearButton.style.display = "none";
+ NotClearButton.style.display = "none";
+
+
+
+
 
 closePopup();
+closeChoices();
 
 
 // This function gets called when API is ready to use
@@ -347,61 +366,70 @@ function onPlayerReady(event) {
     handleOptionClick("d");
   });
 
+  clearButton.addEventListener("click", function () {
+    handleChoice("clear");
+  });
+  NotClearButton.addEventListener("click", function () {
+    handleChoice("notClear");
+  });
+
   function handleOptionClick(option) {
     console.log(
       "Right option: " + correctAnswerOption + ", clicked option: " + option
     );
     if (correctAnswerOption === option) {
       console.log("Right answer");
-      videoEndTime = rightAnswerEndTime;
-      videoStartTime = rightAnswerStartTime;
-      correctAnswerDocId = rightAnswerCorrectDocId;
-      wrongAnswerDocId = rightAnswerWrongDocId;
-      hasQuestion = rightAnswerHasQuestion;
-      correctAnswerOption = rightAnswerOption;
-      showQuestionTime = rightAnswerShowQuestionTime;
-      nextPartTime = rightAnswerNextPartTime;
-      videoStartTime = rightAnswerStartTime;
-      videoId = rightAnswerVideoId;
-
-      loadFirebaseDataForCorrectAnswer(correctAnswerDocId);
-
-      if (wrongAnswerDocId !== "") {
-        loadFirebaseDataForWrongAnswer(wrongAnswerDocId);
-      }
-      player.playVideo();
+      loadFirebaseData(correctAnswerDocId);
     } else {
       console.log("Wrong answer");
-      videoEndTime = wrongAnswerEndTime;
-      videoStartTime = wrongAnswerStartTime;
-      correctAnswerDocId = wrongAnswerCorrectDocId;
-      wrongAnswerDocId = wrongAnswerWrongDocId;
-      hasQuestion = wrongAnswerHasQuestion;
-      correctAnswerOption = wrongAnswerOption;
-      showQuestionTime = wrongAnswerShowQuestionTime;
-      nextPartTime = wrongAnswerNextPartTime;
-      videoStartTime = wrongAnswerStartTime;
-      videoId = wrongAnswerVideoId;
+      loadFirebaseData(wrongAnswerDocId);
 
-      loadFirebaseDataForCorrectAnswer(correctAnswerDocId);
 
-      if (wrongAnswerDocId !== "") {
-        loadFirebaseDataForWrongAnswer(wrongAnswerDocId);
-      }
+     
 
-      player.playVideo();
     }
     optionA.style.display = "none";
     optionB.style.display = "none";
     optionC.style.display = "none";
     optionD.style.display = "none";
+    clearButton.style.display = "none";
+ NotClearButton.style.display = "none";
 
     closePopup();
-    if (documentExists) {
-      player.seekTo(videoStartTime);
-      player.playVideo();
-    }
+    closeChoices();
+   
   }
+
+  function handleChoice(choice) {
+    
+    if (choice === "clear") {
+      console.log("Clear");
+      loadFirebaseData(correctAnswerDocId);
+      player.playVideo();
+    } 
+    else {
+      loadFirebaseData(wrongAnswerDocId);
+    }
+
+
+
+    optionA.style.display = "none";
+    optionB.style.display = "none";
+    optionC.style.display = "none";
+    optionD.style.display = "none";
+    clearButton.style.display = "none";
+ NotClearButton.style.display = "none";
+
+
+
+
+    closePopup();
+    closeChoices();
+    
+  }
+
+
+
 
   var rewindButton = document.getElementById("backward");
   rewindButton.addEventListener("click", function () {
@@ -429,79 +457,27 @@ tag.src = "https://www.youtube.com/player_api";
 var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-function move() {
-  var currentTime = player.playerInfo.currentTime;
-
-  if (currentTime < videoStartTime || currentTime > videoEndTime) {
-    player.pauseVideo();
-  }
-
-  if (showQuestionTime !== "") {
-    if (currentTime >= showQuestionTime) {
-      optionA.style.display = "inline-block";
-      optionB.style.display = "inline-block";
-      optionC.style.display = "inline-block";
-      optionD.style.display = "inline-block";
-      openPopup();
-    }
-  }
-
-  if (nextPartTime !== "") {
-    if (currentTime >= nextPartTime) {
-      optionA.style.display = "none";
-      optionB.style.display = "none";
-      optionC.style.display = "none";
-      optionD.style.display = "none";
-      closePopup();
-
-      videoEndTime = rightAnswerEndTime;
-      videoStartTime = rightAnswerStartTime;
-      correctAnswerDocId = rightAnswerCorrectDocId;
-      wrongAnswerDocId = rightAnswerWrongDocId;
-      hasQuestion = rightAnswerHasQuestion;
-      correctAnswerOption = rightAnswerOption;
-      showQuestionTime = rightAnswerShowQuestionTime;
-      nextPartTime = rightAnswerNextPartTime;
-      videoStartTime = rightAnswerStartTime;
-      videoId = rightAnswerVideoId;
-
-      loadFirebaseDataForCorrectAnswer(correctAnswerDocId);
-
-      if (wrongAnswerDocId !== "") {
-        loadFirebaseDataForWrongAnswer(wrongAnswerDocId);
-      }
-
-      if (documentExists) {
-        player.seekTo(videoStartTime);
-        player.playVideo();
-      }
-    }
-  }
-
-  setTimeout(move, 1000);
-}
-
 
     var pauseButtonImage = document.getElementById("pause_img");
 
     // Handle player state changes
     function onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.PLAYING) {
-            pauseButtonImage.src = "pause1.png";
+            pauseButtonImage.src = "assets/img/pause1.png";
             document.querySelector('.controls').style.display = 'flex'; // Show controls when playing
         } else if (event.data === YT.PlayerState.PAUSED) {
-            pauseButtonImage.src = "play.png";
+            pauseButtonImage.src = "assets/img/play.png";
         }
     }
 
    // Initial button setup for toggling play/pause
     pauseButton.onclick = function () {
         if (player.getPlayerState() === YT.PlayerState.PLAYING) {
-          pauseButtonImage.src = "play.png";
+          pauseButtonImage.src = "assets/img/play.png";
           player.pauseVideo();
 
         } else {
-          pauseButtonImage.src = "pause1.png";
+          pauseButtonImage.src = "assets/img/pause1.png";
           player.playVideo();
 
 
@@ -518,10 +494,11 @@ function stopVideo() {
 
 // Load Firebase data for the main document
 function loadFirebaseData(docId) {
-  console.log("Document loaded with id = " + docId);
 
   var docRef = firestore.collection(collection).doc(docId);
   docRef.get().then(function (doc) {
+    console.log("Document loaded with id = " + docId);
+
     if (doc && doc.exists) {
       var data = doc.data();
 
@@ -529,109 +506,41 @@ function loadFirebaseData(docId) {
       correctAnswerDocId = data.Ir;
       videoEndTime = data.et;
       videoStartTime = data.st;
-      videoStartTime = videoStartTime;
-      videoEndTime = videoEndTime;
+      showQuestionTime= data.sqt;
+      showChoicesTime=data.sot;
+      nextPartTime= data.snt;
+      wrongAnswerDocId=data.Iw;
+      correctAnswerOption =data.rao;
 
-      if (hasQuestion === "yes") {
-        showQuestionTime = data.sqt;
-        wrongAnswerDocId = data.Iw;
-        correctAnswerOption = data.rao;
 
-        loadFirebaseDataForCorrectAnswer(correctAnswerDocId);
-        loadFirebaseDataForWrongAnswer(wrongAnswerDocId);
-        nextPartTime = "";
-      } else {
-        nextPartTime = data.snt;
-        showQuestionTime = "";
-        wrongAnswerDocId = "";
-        correctAnswerOption = "";
-        loadFirebaseDataForCorrectAnswer(correctAnswerDocId);
-      }
+
+      console.log("initial values ");
+      console.log("hasQuestion: " + hasQuestion);
+      console.log("correctAnswerDocId: " + correctAnswerDocId);
+      console.log("videoEndTime: " + videoEndTime);
+      console.log("videoStartTime: " + videoStartTime);
+      console.log("showQuestionTime: " + showQuestionTime);
+      console.log("showChoicesTime: " + showChoicesTime);
+      console.log("nextPartTime: " + nextPartTime);
+      console.log("wrongAnswerDocId: " + wrongAnswerDocId);
+      console.log("correctAnswerOption: " + correctAnswerOption);
+
+
+      player.seekTo(videoStartTime);
+        player.playVideo();
+
+      
+     
+
     } else {
       documentExists = false;
+      console.log("Document not exist with id = " + docId);
+
     }
   });
 }
 
 // Load Firebase data for the correct answer path
-function loadFirebaseDataForCorrectAnswer(docId) {
-  console.log("Correct answer document loaded with id = " + docId);
-
-  rightAnswerStartTime = "";
-  rightAnswerEndTime = "";
-  rightAnswerNextPartTime = "";
-  rightAnswerShowQuestionTime = "";
-
-  var docRef = firestore.collection(collection).doc(docId);
-  docRef.get().then(function (doc) {
-    if (doc && doc.exists) {
-      var data = doc.data();
-
-      rightAnswerEndTime = data.et;
-      rightAnswerStartTime = data.st;
-      rightAnswerHasQuestion = data.hq;
-      rightAnswerCorrectDocId = data.Ir;
-      rightAnswerVideoStartTime = rightAnswerStartTime;
-      rightAnswerVideoEndTime = rightAnswerEndTime;
-
-      if (rightAnswerHasQuestion === "yes") {
-        rightAnswerShowQuestionTime = data.sqt;
-        rightAnswerWrongDocId = data.Iw;
-        rightAnswerOption = data.rao;
-
-        rightAnswerNextPartTime = "";
-      } else {
-        rightAnswerNextPartTime = data.snt;
-        rightAnswerShowQuestionTime = "";
-        rightAnswerWrongDocId = "";
-        rightAnswerOption = "";
-      }
-    } else {
-      documentExists = false;
-    }
-  });
-}
-
-// Load Firebase data for the wrong answer path
-function loadFirebaseDataForWrongAnswer(docId) {
-  console.log("Wrong answer document loaded with id = " + docId);
-
-  wrongAnswerStartTime = "";
-  wrongAnswerEndTime = "";
-  wrongAnswerNextPartTime = "";
-  wrongAnswerShowQuestionTime = "";
-
-  var docRef = firestore.collection(collection).doc(docId);
-  docRef.get().then(function (doc) {
-    if (doc && doc.exists) {
-      var data = doc.data();
-
-      wrongAnswerEndTime = data.et;
-      wrongAnswerStartTime = data.st;
-      wrongAnswerHasQuestion = data.hq;
-      wrongAnswerCorrectDocId = data.Ir;
-      wrongAnswerVideoStartTime = wrongAnswerStartTime;
-      wrongAnswerVideoEndTime = wrongAnswerEndTime;
-
-      if (wrongAnswerHasQuestion === "yes") {
-        wrongAnswerShowQuestionTime = data.sqt;
-        wrongAnswerWrongDocId = data.Iw;
-        wrongAnswerOption = data.rao;
-
-        loadFirebaseDataForCorrectAnswer(wrongAnswerCorrectDocId);
-        loadFirebaseDataForWrongAnswer(wrongAnswerWrongDocId);
-        wrongAnswerNextPartTime = "";
-      } else {
-        wrongAnswerNextPartTime = data.snt;
-        wrongAnswerShowQuestionTime = "";
-        wrongAnswerWrongDocId = "";
-        wrongAnswerOption = "";
-      }
-    } else {
-      documentExists = false;
-    }
-  });
-}
 
 function openPopup() {
   document.getElementsByClassName("options")[0].classList.add("active");
@@ -641,11 +550,67 @@ function closePopup() {
   document.getElementsByClassName("options")[0].classList.remove("active");
 }
 
+function openChoices() {
+  document.getElementsByClassName("choices")[0].classList.add("active");
+}
+
+function closeChoices() {
+  document.getElementsByClassName("choices")[0].classList.remove("active");
+}
+
+
+
 
 document.getElementById('clear_button').addEventListener('click', function() {
-           console.log("hi");
            player.playVideo();
         });
+
+
+        function move() {
+  var currentTime = player.playerInfo.currentTime;
+
+  if (currentTime < videoStartTime || currentTime > videoEndTime) {
+    player.pauseVideo();
+  }
+
+  if (showQuestionTime) {
+    if (currentTime >= showQuestionTime) {
+      optionA.style.display = "inline-block";
+      optionB.style.display = "inline-block";
+      optionC.style.display = "inline-block";
+      optionD.style.display = "inline-block";
+      openPopup();
+      closeChoices();
+    }
+  }
+
+
+ else if (showChoicesTime) {
+    if (currentTime >= showChoicesTime) {
+      clearButton.style.display = "inline-block";
+      NotClearButton.style.display = "inline-block";
+      
+      openChoices();
+      closePopup();
+    }
+  }
+
+ else if (nextPartTime) {
+    if (currentTime >= nextPartTime) {
+       
+        loadFirebaseData(correctAnswerDocId);
+
+      
+    }
+  }
+  else {
+    console.log("error 2");
+  }
+
+  document.getElementById("timer").innerHTML= currentTime + " " + showChoicesTime;
+  setTimeout(move, 1000);
+}
+
 
 
     </script>
